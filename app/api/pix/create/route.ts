@@ -4,7 +4,9 @@ import QRCode from "qrcode";
 interface CreatePixRequest {
   amount: number;
   customerName: string;
+  customerEmail: string;
   customerPhone: string;
+  customerDocument: string;
   items: Array<{
     name: string;
     quantity: number;
@@ -15,7 +17,7 @@ interface CreatePixRequest {
 export async function POST(request: Request) {
   try {
     const body: CreatePixRequest = await request.json();
-    const { amount, customerName, customerPhone, items } = body;
+    const { amount, customerName, customerEmail, customerPhone, customerDocument, items } = body;
 
     // Validate required fields
     if (!amount || amount <= 0) {
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
 
     // Get API credentials from environment
     const apiKey = process.env.UMBRELLA_API_KEY;
-    const apiUrl = process.env.UMBRELLA_API_URL || "https://api.umbrellapag.com";
+    const apiUrl = "https://api-gateway.umbrellapag.com/api";
 
     if (!apiKey) {
       console.error("UMBRELLA_API_KEY not configured");
@@ -37,26 +39,54 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create transaction description
-    const description = items
-      .map((item) => `${item.quantity}x ${item.name}`)
-      .join(", ");
+    // Format items for Umbrella API
+    const formattedItems = items.map((item) => ({
+      title: item.name,
+      unitPrice: Math.round(item.price * 100), // Convert to cents
+      quantity: item.quantity,
+      tangible: true,
+      externalRef: `item-${Date.now()}`,
+    }));
 
     // Create Pix payment via Umbrella API
-    const response = await fetch(`${apiUrl}/api/user/transactions`, {
+    const response = await fetch(`${apiUrl}/user/transactions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${apiKey}`,
+        "User-Agent": "UMBRELLAB2B/1.0",
       },
       body: JSON.stringify({
-        amount: amount,
-        description: `Pedido Sushi Delivery: ${description}`,
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "BRL",
+        paymentMethod: "PIX",
         customer: {
+          id: crypto.randomUUID(),
           name: customerName,
+          email: customerEmail || "cliente@email.com",
+          document: {
+            number: customerDocument || "000.000.000-00",
+            type: "CPF",
+          },
           phone: customerPhone,
+          externalRef: `customer-${Date.now()}`,
+          address: {
+            street: "Endereco",
+            streetNumber: "0",
+            complement: "",
+            zipCode: "00000-000",
+            neighborhood: "Centro",
+            city: "Cidade",
+            state: "SP",
+            country: "BR",
+          },
         },
-        expiresIn: 3600, // 1 hour
+        items: formattedItems,
+        pix: {
+          expiresInDays: 1,
+        },
+        metadata: JSON.stringify({ source: "sushi-delivery" }),
+        traceable: true,
       }),
     });
 

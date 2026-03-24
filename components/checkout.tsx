@@ -21,6 +21,8 @@ export function Checkout() {
   const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
+    cpf: "",
     phone: "",
     address: "",
     number: "",
@@ -63,7 +65,9 @@ export function Checkout() {
         body: JSON.stringify({
           amount: total,
           customerName: formData.name,
+          customerEmail: formData.email,
           customerPhone: formData.phone,
+          customerDocument: formData.cpf,
           items: items.map((item) => ({
             name: item.product.name,
             quantity: item.quantity,
@@ -254,16 +258,42 @@ export function Checkout() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Telefone</label>
+                  <label className="text-sm font-medium">E-mail</label>
                   <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
+                    type="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleInputChange}
                     required
                     className="w-full mt-1 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="(00) 00000-0000"
+                    placeholder="seu@email.com"
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium">CPF</label>
+                    <input
+                      type="text"
+                      name="cpf"
+                      value={formData.cpf}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full mt-1 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="000.000.000-00"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Telefone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full mt-1 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="(00) 00000-0000"
+                    />
+                  </div>
                 </div>
               </div>
 
