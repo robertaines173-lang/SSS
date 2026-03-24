@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sushi Delivery - Culinaria Japonesa - Faca seu pedido!",
-  description: "PROMOCAO INAUGURACAO - Delivery Culinaria Japonesa. Acesse e peca agora pelo delivery food!",
+  title: "Sushi Delivery - Culinaria Japonesa",
+  description: "Os melhores pratos da culinaria japonesa com delivery rapido e pagamento via Pix",
 };
 
 export const viewport: Viewport = {
